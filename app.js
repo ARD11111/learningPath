@@ -1,19 +1,20 @@
 // ==================== GLOBAL VARIABLES ====================
 let resources = [
-  { id: 1, title: "HTML Basics", type: "article", skill: "Web Development", url: "https://www.w3schools.com/html/" },
-  { id: 2, title: "CSS Flexbox Video", type: "video", skill: "Web Development", url: "https://www.youtube.com/watch?v=JJSoEo8JSnc" },
-  { id: 3, title: "JavaScript Quiz", type: "exercise", skill: "Web Development", url: "https://www.w3schools.com/js/js_quiz.asp" },
+  // Web Development
+  { id: 1, title: "HTML Basics", type: "article", skill: "Web Development", level: "Basic", url: "https://www.w3schools.com/html/" },
+  { id: 2, title: "CSS Flexbox Video", type: "video", skill: "Web Development", level: "Intermediate", url: "https://www.youtube.com/watch?v=JJSoEo8JSnc" },
+  { id: 3, title: "JavaScript Quiz", type: "exercise", skill: "Web Development", level: "Advanced", url: "https://www.w3schools.com/js/js_quiz.asp" },
+
   // Python
-  { id: 4, title: "Python Basics", type: "article", skill: "Python", url: "https://www.w3schools.com/python/" },
-  { id: 5, title: "Python Functions Video", type: "video", skill: "Python", url: "https://www.youtube.com/watch?v=9Os0o3wzS_I" },
-  { id: 6, title: "Python Quiz", type: "exercise", skill: "Python", url: "https://www.w3schools.com/python/python_quiz.asp" },
+  { id: 4, title: "Python Basics", type: "article", skill: "Python", level: "Basic", url: "https://www.w3schools.com/python/" },
+  { id: 5, title: "Python Functions Video", type: "video", skill: "Python", level: "Intermediate", url: "https://www.youtube.com/watch?v=9Os0o3wzS_I" },
+  { id: 6, title: "Python Quiz", type: "exercise", skill: "Python", level: "Advanced", url: "https://www.w3schools.com/python/python_quiz.asp" },
 
   // Data Science
-  { id: 7, title: "Intro to Data Science", type: "article", skill: "Data Science", url: "https://www.datasciencecentral.com/" },
-  { id: 8, title: "Data Science Project Video", type: "video", skill: "Data Science", url: "https://www.youtube.com/watch?v=ua-CiDNNj30" },
-  { id: 9, title: "Data Science Quiz", type: "exercise", skill: "Data Science", url: "https://www.proprofs.com/quiz-school/story.php?title=data-science-quiz" },
+  { id: 7, title: "Intro to Data Science", type: "article", skill: "Data Science", level: "Basic", url: "https://www.datasciencecentral.com/" },
+  { id: 8, title: "Data Science Project Video", type: "video", skill: "Data Science", level: "Intermediate", url: "https://www.youtube.com/watch?v=ua-CiDNNj30" },
+  { id: 9, title: "Data Science Quiz", type: "exercise", skill: "Data Science", level: "Advanced", url: "https://www.proprofs.com/quiz-school/story.php?title=data-science-quiz" },
 ];
-
 
 let user = JSON.parse(localStorage.getItem("user")) || null;
 let progress = JSON.parse(localStorage.getItem("progress")) || {}; // { resourceId: true }
@@ -22,11 +23,9 @@ let progress = JSON.parse(localStorage.getItem("progress")) || {}; // { resource
 function renderNavbar() {
   const navRight = document.getElementById("navbar-right");
   if (!navRight) return;
-
-  navRight.innerHTML = ""; // clear previous content
+  navRight.innerHTML = "";
 
   if (user) {
-    // Create profile dropdown HTML
     navRight.innerHTML = `
       <div class="profile-dropdown">
         <button id="profileBtn" class="profile-icon">${user.name[0].toUpperCase()}</button>
@@ -42,27 +41,22 @@ function renderNavbar() {
     const dropdownMenu = document.getElementById("dropdownMenu");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    // Toggle dropdown on click
     profileBtn.addEventListener("click", (e) => {
-      e.stopPropagation(); // prevent closing immediately
+      e.stopPropagation();
       dropdownMenu.classList.toggle("show");
     });
 
-    // Close dropdown when clicking outside
     document.addEventListener("click", (e) => {
       if (!e.target.closest(".profile-dropdown")) {
         dropdownMenu.classList.remove("show");
       }
     });
 
-    // Logout functionality
     logoutBtn.addEventListener("click", () => {
       logout();
       dropdownMenu.classList.remove("show");
     });
-
   } else {
-    // Show Sign In button
     const btn = document.createElement("button");
     btn.classList.add("signin-btn");
     btn.innerText = "Sign In";
@@ -74,10 +68,7 @@ function renderNavbar() {
 // ==================== LOGIN FUNCTIONS ====================
 function openLogin() {
   const modal = document.getElementById("login-modal");
-  if (!modal) {
-    console.error("Login modal element not found!");
-    return;
-  }
+  if (!modal) return;
   modal.style.display = "flex";
 }
 
@@ -95,7 +86,7 @@ function login() {
   closeLogin();
   renderNavbar();
   renderHome();
-  renderResources();
+  renderExplore();
   renderMyLearning();
 }
 
@@ -106,7 +97,7 @@ function logout() {
   localStorage.removeItem("progress");
   renderNavbar();
   renderHome();
-  renderResources();
+  renderExplore();
   renderMyLearning();
 }
 
@@ -115,77 +106,171 @@ function renderHome() {
   const container = document.getElementById("home-content");
   if (!container) return;
 
+  container.innerHTML = ""; // Clear previous content
+
+  // Calculate overall progress
+  const totalResources = resources.length;
+  const completedResources = Object.values(progress).filter(Boolean).length;
+  const progressPercent = totalResources === 0 ? 0 : Math.round((completedResources / totalResources) * 100);
+
   if (user) {
+    // ========== LOGGED-IN VIEW ==========
     container.innerHTML = `
-      <h2>Welcome back, ${user.name}!</h2>
-      <p>Your current path: Web Development</p>
-      <a href="mylearning.html">Continue Learning</a>
+      <section class="hero">
+        <h1>Welcome back, ${user.name}!</h1>
+        <p>Continue your learning journey below.</p>
+      </section>
+
+      <!-- Progress Snapshot -->
+      <section class="progress">
+        <div class="progress-container">
+          <div class="progress-bar" style="width: ${progressPercent}%"></div>
+        </div>
+        <p class="progress-text">${completedResources} of ${totalResources} resources completed (${progressPercent}%)</p>
+      </section>
     `;
+
+    // Learning path cards
+    const skills = ["Web Development", "Python", "Data Science"];
+    const pathContainer = document.createElement("div");
+    pathContainer.classList.add("learning-path");
+
+    skills.forEach(skill => {
+      const skillResources = resources.filter(r => r.skill === skill);
+      const completedCount = skillResources.filter(r => progress[r.id]).length;
+      const totalCount = skillResources.length;
+
+      const card = document.createElement("div");
+      card.classList.add("path-card");
+      card.innerHTML = `
+        <h3>${skill}</h3>
+        <p>Progress: ${completedCount} / ${totalCount}</p>
+        <a href="explore.html">Explore ${skill}</a>
+      `;
+      pathContainer.appendChild(card);
+    });
+
+    container.appendChild(pathContainer);
+
   } else {
-    container.innerHTML = `<button onclick="openLogin()">Sign in to track progress</button>`;
+    // ========== GUEST VIEW ==========
+    container.innerHTML = `
+      <section class="hero">
+        <h1>Learn Tech Skills Faster</h1>
+        <p>Interactive courses & hands-on practice for real-world growth.</p>
+        <button class="cta-btn" onclick="openLogin()">Get Started Free</button>
+      </section>
+
+      <!-- Featured Courses -->
+      <section class="featured">
+        <h2>Featured Courses</h2>
+        <div class="course-grid">
+          <div class="course-card">Java Basics</div>
+          <div class="course-card">Web Development</div>
+          <div class="course-card">Data Science</div>
+        </div>
+      </section>
+
+      <!-- Categories -->
+      <section class="categories">
+        <h2>Explore Categories</h2>
+        <div class="cat-grid">
+          <div class="cat">Programming</div>
+          <div class="cat">Cloud</div>
+          <div class="cat">Cybersecurity</div>
+          <div class="cat">Design</div>
+        </div>
+      </section>
+
+      <!-- Why Choose Us -->
+      <section class="why-us">
+        <h2>Why Choose Us?</h2>
+        <ul>
+          <li>Hands-on Projects</li>
+          <li>Expert Instructors</li>
+          <li>Track Your Progress</li>
+          <li>Learn at Your Own Pace</li>
+        </ul>
+      </section>
+    `;
   }
 }
 
 // ==================== EXPLORE PAGE ====================
+function renderExplore() {
+  const skillDropdown = document.getElementById("filter-skill");
+  if (!skillDropdown) return;
 
-function renderResources() {
-  const container = document.getElementById("resources");
-  if (!container) return;
-
-  const filterTypeEl = document.getElementById("filter-type");
-  const filterSkillEl = document.getElementById("filter-skill");
-
-  const filterType = filterTypeEl ? filterTypeEl.value : "all";
-  const filterSkill = filterSkillEl ? filterSkillEl.value : "";
-
-  // Filter resources
-  let filtered = resources;
-
-  if (filterType !== "all") {
-    filtered = filtered.filter(r => r.type === filterType);
-  }
-
- if (filterSkill === "") {
-  container.innerHTML = "<p>Please choose a skill to see resources.</p>";
-  return; // stop rendering further
-} else {
-  filtered = filtered.filter(r => r.skill === filterSkill);
+  // Reset dropdown and cards
+  skillDropdown.value = "";
+  document.getElementById("level-cards").innerHTML = "";
+  document.getElementById("level-resources").innerHTML = "";
 }
 
+function showLevelCards() {
+  const skill = document.getElementById("filter-skill").value;
+  const levelContainer = document.getElementById("level-cards");
+  const resourceContainer = document.getElementById("level-resources");
 
-  container.innerHTML = "";
+  levelContainer.innerHTML = "";
+  resourceContainer.innerHTML = "";
+
+  if (!skill) return;
+
+  const levels = ["Basic", "Intermediate", "Advanced"];
+
+  levels.forEach(level => {
+    const levelResources = resources.filter(r => r.skill === skill && r.level === level);
+    const completedCount = levelResources.filter(r => progress[r.id]).length;
+
+    const levelCard = document.createElement("div");
+    levelCard.classList.add("level-card");
+    levelCard.innerHTML = `
+      <h3>${level}</h3>
+      <p>Progress: ${completedCount} / ${levelResources.length}</p>
+    `;
+
+    levelCard.addEventListener("click", () => showResources(skill, level));
+    levelContainer.appendChild(levelCard);
+  });
+}
+
+function showResources(skill, level) {
+  const container = document.getElementById("level-resources");
+  container.innerHTML = `<h3>${skill} - ${level} Resources</h3>`;
+
+  const filtered = resources.filter(r => r.skill === skill && r.level === level);
 
   if (filtered.length === 0) {
-    container.innerHTML = "<p>No resources found for selected filters.</p>";
+    container.innerHTML += "<p>No resources available for this level.</p>";
     return;
   }
 
-  // Render resource cards
   filtered.forEach(r => {
-  const completed = progress[r.id];
-  const card = document.createElement("div");
-  card.classList.add("card");
+    const completed = progress[r.id];
+    const card = document.createElement("div");
+    card.classList.add("resource-card");
+    card.innerHTML = `
+      <h4><a href="${r.url}" target="_blank">${r.title}</a></h4>
+      <p>Type: ${r.type}</p>
+    `;
 
-  card.innerHTML = `
-    <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
-    <p>Type: ${r.type}</p>
-    <p>Skill: ${r.skill}</p>
-  `;
+    const btn = document.createElement("button");
+    if (user) {
+      btn.innerText = completed ? "Completed ✅" : "Mark as Complete";
+      btn.addEventListener("click", () => {
+        toggleProgress(r.id);
+        showLevelCards(); 
+        showResources(skill, level); 
+      });
+    } else {
+      btn.innerText = "Sign in to track progress";
+      btn.addEventListener("click", openLogin);
+    }
 
-  const btn = document.createElement("button");
-
-  if (user) {
-    btn.innerText = completed ? "Completed ✅" : "Mark as Complete";
-    btn.addEventListener("click", () => toggleProgress(r.id));
-  } else {
-    btn.innerText = "Sign in to track progress";
-    btn.addEventListener("click", openLogin);
-  }
-
-  card.appendChild(btn);
-  container.appendChild(card);
-});
-
+    card.appendChild(btn);
+    container.appendChild(card);
+  });
 }
 
 // ==================== MY LEARNING PAGE ====================
@@ -201,11 +286,8 @@ function renderMyLearning() {
   // Group progress by skill
   const skillMap = {};
   resources.forEach(r => {
-    if (progress[r.id]) {
-      if (!skillMap[r.skill]) skillMap[r.skill] = { completed: 0, total: 0 };
-      skillMap[r.skill].completed++;
-    }
     if (!skillMap[r.skill]) skillMap[r.skill] = { completed: 0, total: 0 };
+    if (progress[r.id]) skillMap[r.skill].completed++;
     skillMap[r.skill].total++;
   });
 
@@ -216,7 +298,7 @@ function renderMyLearning() {
     return;
   }
 
-  container.innerHTML = ""; // clear
+  container.innerHTML = "";
 
   skillsStarted.forEach(skill => {
     const card = document.createElement("div");
@@ -229,12 +311,10 @@ function renderMyLearning() {
   });
 }
 
-
 // ==================== PROGRESS HANDLING ====================
 function toggleProgress(id) {
   progress[id] = !progress[id];
   localStorage.setItem("progress", JSON.stringify(progress));
-  renderResources();
   renderMyLearning();
 }
 
@@ -242,6 +322,6 @@ function toggleProgress(id) {
 window.onload = () => {
   renderNavbar();
   renderHome();
-  renderResources();
+  renderExplore();
   renderMyLearning();
 };
