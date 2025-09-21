@@ -1,9 +1,19 @@
 // ==================== GLOBAL VARIABLES ====================
 let resources = [
-  { id: 1, title: "HTML Basics", type: "article", skill: "Web Development" },
-  { id: 2, title: "CSS Flexbox Video", type: "video", skill: "Web Development" },
-  { id: 3, title: "JavaScript Quiz", type: "exercise", skill: "Web Development" },
+  { id: 1, title: "HTML Basics", type: "article", skill: "Web Development", url: "https://www.w3schools.com/html/" },
+  { id: 2, title: "CSS Flexbox Video", type: "video", skill: "Web Development", url: "https://www.youtube.com/watch?v=JJSoEo8JSnc" },
+  { id: 3, title: "JavaScript Quiz", type: "exercise", skill: "Web Development", url: "https://www.w3schools.com/js/js_quiz.asp" },
+  // Python
+  { id: 4, title: "Python Basics", type: "article", skill: "Python", url: "https://www.w3schools.com/python/" },
+  { id: 5, title: "Python Functions Video", type: "video", skill: "Python", url: "https://www.youtube.com/watch?v=9Os0o3wzS_I" },
+  { id: 6, title: "Python Quiz", type: "exercise", skill: "Python", url: "https://www.w3schools.com/python/python_quiz.asp" },
+
+  // Data Science
+  { id: 7, title: "Intro to Data Science", type: "article", skill: "Data Science", url: "https://www.datasciencecentral.com/" },
+  { id: 8, title: "Data Science Project Video", type: "video", skill: "Data Science", url: "https://www.youtube.com/watch?v=ua-CiDNNj30" },
+  { id: 9, title: "Data Science Quiz", type: "exercise", skill: "Data Science", url: "https://www.proprofs.com/quiz-school/story.php?title=data-science-quiz" },
 ];
+
 
 let user = JSON.parse(localStorage.getItem("user")) || null;
 let progress = JSON.parse(localStorage.getItem("progress")) || {}; // { resourceId: true }
@@ -152,29 +162,30 @@ function renderResources() {
 
   // Render resource cards
   filtered.forEach(r => {
-    const completed = progress[r.id];
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.innerHTML = `
-      <h3>${r.title}</h3>
-      <p>Type: ${r.type}</p>
-      <p>Skill: ${r.skill}</p>
-    `;
+  const completed = progress[r.id];
+  const card = document.createElement("div");
+  card.classList.add("card");
 
-    const btn = document.createElement("button");
+  card.innerHTML = `
+    <h3><a href="${r.url}" target="_blank">${r.title}</a></h3>
+    <p>Type: ${r.type}</p>
+    <p>Skill: ${r.skill}</p>
+  `;
 
-    if (user) {
-      btn.innerText = completed ? "Completed ✅" : "Mark as Complete";
-      btn.addEventListener("click", () => toggleProgress(r.id));
-    } else {
-      btn.innerText = "Sign in to track progress";
-      // FIX: attach click listener directly
-      btn.addEventListener("click", openLogin);
-    }
+  const btn = document.createElement("button");
 
-    card.appendChild(btn);
-    container.appendChild(card);
-  });
+  if (user) {
+    btn.innerText = completed ? "Completed ✅" : "Mark as Complete";
+    btn.addEventListener("click", () => toggleProgress(r.id));
+  } else {
+    btn.innerText = "Sign in to track progress";
+    btn.addEventListener("click", openLogin);
+  }
+
+  card.appendChild(btn);
+  container.appendChild(card);
+});
+
 }
 
 // ==================== MY LEARNING PAGE ====================
@@ -187,14 +198,37 @@ function renderMyLearning() {
     return;
   }
 
-  const learned = resources.filter(r => progress[r.id]);
-  if (learned.length === 0) {
+  // Group progress by skill
+  const skillMap = {};
+  resources.forEach(r => {
+    if (progress[r.id]) {
+      if (!skillMap[r.skill]) skillMap[r.skill] = { completed: 0, total: 0 };
+      skillMap[r.skill].completed++;
+    }
+    if (!skillMap[r.skill]) skillMap[r.skill] = { completed: 0, total: 0 };
+    skillMap[r.skill].total++;
+  });
+
+  const skillsStarted = Object.keys(skillMap).filter(skill => skillMap[skill].completed > 0);
+
+  if (skillsStarted.length === 0) {
     container.innerHTML = "<p>No progress yet. Explore resources to start learning!</p>";
     return;
   }
 
-  container.innerHTML = learned.map(r => `<p>${r.title} ✅</p>`).join("");
+  container.innerHTML = ""; // clear
+
+  skillsStarted.forEach(skill => {
+    const card = document.createElement("div");
+    card.classList.add("skill-card");
+    card.innerHTML = `
+      <h3>${skill}</h3>
+      <p>Progress: ${skillMap[skill].completed} / ${skillMap[skill].total} resources completed</p>
+    `;
+    container.appendChild(card);
+  });
 }
+
 
 // ==================== PROGRESS HANDLING ====================
 function toggleProgress(id) {
