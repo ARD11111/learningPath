@@ -21,27 +21,33 @@
   <h2>Explore Resources</h2>
 
   <!-- Filters -->
-  <div class="filters">
-    <label for="filter-type">Choose Resource Type:</label>
-    <select id="filter-type" onchange="renderResources()">
-      <option value="all">All</option>
-      <option value="article">Article</option>
-      <option value="video">Video</option>
-      <option value="exercise">Exercise</option>
-    </select>
+ <!-- Filters -->
+<div class="filters">
+  <label for="filter-type">Choose Resource Type:</label>
+  <select id="filter-type" onchange="renderResources()">
+    <option value="all">All</option>
+    <option value="article">Article</option>
+    <option value="video">Video</option>
+    <option value="exercise">Exercise</option>
+  </select>
 
-    <label for="filter-skill">Choose Skill:</label>
-    <select id="filter-skill" onchange="renderResources()">
-      <option value="" disabled selected>Choose Skill</option> 
-      <option value="Web Development">Web Development</option>
-      <option value="Python">Python</option>
-      <option value="Data Science">Data Science</option>
-      <!-- Add more skills as needed -->
-    </select>
-  </div>
+  <label for="filter-skill">Choose Skill:</label>
+  <select id="filter-skill" onchange="showLevelCards()">
+    <option value="" disabled selected>Choose Skill</option> 
+    <option value="Web Development">Web Development</option>
+    <option value="Python">Python</option>
+    <option value="Data Science">Data Science</option>
+    <!-- Add more skills as needed -->
+  </select>
+</div>
 
-  <!-- Resources Container -->
-  <div id="resources"></div>
+
+  
+
+  <div id="level-cards"></div> <!-- Will show Basic/Intermediate/Advanced cards -->
+  <div id="level-resources"></div> <!-- Will show resources when level card clicked -->
+</div>
+
 
 </div>
 
