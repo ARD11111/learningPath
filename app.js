@@ -1,6 +1,8 @@
 // ==================== GLOBAL VARIABLES ====================
+
 let resources = [
   // Web Development
+  { id: 1, title: "HTML Basics", type: "article", skill: "Web Development", level: "Basic", url: "https://www.w3schools.com/html/" },
   { id: 1, title: "HTML Basics", type: "article", skill: "Web Development", level: "Basic", url: "https://www.w3schools.com/html/" },
   { id: 2, title: "CSS Flexbox Video", type: "video", skill: "Web Development", level: "Intermediate", url: "https://www.youtube.com/watch?v=JJSoEo8JSnc" },
   { id: 3, title: "JavaScript Quiz", type: "exercise", skill: "Web Development", level: "Advanced", url: "https://www.w3schools.com/js/js_quiz.asp" },
@@ -26,9 +28,10 @@ function renderNavbar() {
   navRight.innerHTML = "";
 
   if (user) {
+    // Logged-in: show profile and sign out
     navRight.innerHTML = `
       <div class="profile-dropdown">
-        <button id="profileBtn" class="profile-icon">${user.name[0].toUpperCase()}</button>
+        <button id="profileBtn" class="profile-icon">${user.email[0].toUpperCase()}</button>
         <div id="dropdownMenu" class="dropdown-content">
           <a href="mylearning.html">My Learning</a>
           <a href="settings.html">Settings</a>
@@ -41,15 +44,13 @@ function renderNavbar() {
     const dropdownMenu = document.getElementById("dropdownMenu");
     const logoutBtn = document.getElementById("logoutBtn");
 
-    profileBtn.addEventListener("click", (e) => {
+    profileBtn.addEventListener("click", e => {
       e.stopPropagation();
       dropdownMenu.classList.toggle("show");
     });
 
-    document.addEventListener("click", (e) => {
-      if (!e.target.closest(".profile-dropdown")) {
-        dropdownMenu.classList.remove("show");
-      }
+    document.addEventListener("click", e => {
+      if (!e.target.closest(".profile-dropdown")) dropdownMenu.classList.remove("show");
     });
 
     logoutBtn.addEventListener("click", () => {
@@ -57,6 +58,7 @@ function renderNavbar() {
       dropdownMenu.classList.remove("show");
     });
   } else {
+    // Guest: show Sign In button
     const btn = document.createElement("button");
     btn.classList.add("signin-btn");
     btn.innerText = "Sign In";
@@ -67,62 +69,62 @@ function renderNavbar() {
 
 // ==================== LOGIN FUNCTIONS ====================
 function openLogin() {
-  const modal = document.getElementById("login-modal");
-  if (!modal) return;
-  modal.style.display = "flex";
+  document.getElementById("login-modal").style.display = "flex";
 }
 
 function closeLogin() {
-  const modal = document.getElementById("login-modal");
-  if (modal) modal.style.display = "none";
+  document.getElementById("login-modal").style.display = "none";
 }
 
 function login() {
-  const username = document.getElementById("username").value.trim();
-  if (!username) return;
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
 
-  user = { name: username };
+  if (!email || !password) {
+    alert("Please enter both email and password.");
+    return;
+  }
+
+  user = { email };
   localStorage.setItem("user", JSON.stringify(user));
+
   closeLogin();
   renderNavbar();
-  renderHome();
-  renderExplore();
-  renderMyLearning();
+  document.getElementById("guest-content").style.display = "none";
+  document.getElementById("user-content").style.display = "block";
+
+  document.getElementById("username").textContent = email.split("@")[0];
+  document.getElementById("login-form").reset();
 }
 
 function logout() {
   user = null;
-  progress = {};
   localStorage.removeItem("user");
-  localStorage.removeItem("progress");
-  renderNavbar();
-  renderHome();
-  renderExplore();
-  renderMyLearning();
-}
 
+  renderNavbar();
+  document.getElementById("guest-content").style.display = "block";
+  document.getElementById("user-content").style.display = "none";
+}
 // ==================== HOME PAGE ====================
 function renderHome() {
   const container = document.getElementById("home-content");
   if (!container) return;
+  container.innerHTML = "";
 
-  container.innerHTML = ""; // Clear previous content
-
-  // Calculate overall progress
   const totalResources = resources.length;
   const completedResources = Object.values(progress).filter(Boolean).length;
   const progressPercent = totalResources === 0 ? 0 : Math.round((completedResources / totalResources) * 100);
 
   if (user) {
-    // ========== LOGGED-IN VIEW ==========
     container.innerHTML = `
       <section class="hero">
-        <h1>Welcome back, ${user.name}!</h1>
-        <p>Continue your learning journey below.</p>
+        <h1>Welcome back, ${user.name} 👋</h1>
+        <p>Pick up where you left off and continue your journey!</p>
+        <button class="cta-btn" onclick="window.location.href='mylearning.html'">Go to Dashboard</button>
       </section>
 
-      <!-- Progress Snapshot -->
       <section class="progress">
+        <h2>Your Overall Progress</h2>
         <div class="progress-container">
           <div class="progress-bar" style="width: ${progressPercent}%"></div>
         </div>
@@ -145,15 +147,25 @@ function renderHome() {
       card.innerHTML = `
         <h3>${skill}</h3>
         <p>Progress: ${completedCount} / ${totalCount}</p>
-        <a href="explore.html">Explore ${skill}</a>
+        <button onclick="window.location.href='explore.html'">Explore ${skill}</button>
       `;
       pathContainer.appendChild(card);
     });
 
     container.appendChild(pathContainer);
 
+    // Dynamic Recommendations
+    const recSection = document.createElement("section");
+    recSection.classList.add("recommend");
+    const unfinished = resources.filter(r => !progress[r.id]);
+    recSection.innerHTML = `
+      <h2>Recommended for You</h2>
+      <div class="course-grid">
+        ${unfinished.slice(0,3).map(r => `<div class="course-card">${r.title}</div>`).join('')}
+      </div>
+    `;
+    container.appendChild(recSection);
   } else {
-    // ========== GUEST VIEW ==========
     container.innerHTML = `
       <section class="hero">
         <h1>Learn Tech Skills Faster</h1>
@@ -161,7 +173,6 @@ function renderHome() {
         <button class="cta-btn" onclick="openLogin()">Get Started Free</button>
       </section>
 
-      <!-- Featured Courses -->
       <section class="featured">
         <h2>Featured Courses</h2>
         <div class="course-grid">
@@ -171,7 +182,6 @@ function renderHome() {
         </div>
       </section>
 
-      <!-- Categories -->
       <section class="categories">
         <h2>Explore Categories</h2>
         <div class="cat-grid">
@@ -182,7 +192,6 @@ function renderHome() {
         </div>
       </section>
 
-      <!-- Why Choose Us -->
       <section class="why-us">
         <h2>Why Choose Us?</h2>
         <ul>
@@ -201,7 +210,6 @@ function renderExplore() {
   const skillDropdown = document.getElementById("filter-skill");
   if (!skillDropdown) return;
 
-  // Reset dropdown and cards
   skillDropdown.value = "";
   document.getElementById("level-cards").innerHTML = "";
   document.getElementById("level-resources").innerHTML = "";
@@ -211,14 +219,11 @@ function showLevelCards() {
   const skill = document.getElementById("filter-skill").value;
   const levelContainer = document.getElementById("level-cards");
   const resourceContainer = document.getElementById("level-resources");
-
   levelContainer.innerHTML = "";
   resourceContainer.innerHTML = "";
-
   if (!skill) return;
 
   const levels = ["Basic", "Intermediate", "Advanced"];
-
   levels.forEach(level => {
     const levelResources = resources.filter(r => r.skill === skill && r.level === level);
     const completedCount = levelResources.filter(r => progress[r.id]).length;
@@ -229,7 +234,6 @@ function showLevelCards() {
       <h3>${level}</h3>
       <p>Progress: ${completedCount} / ${levelResources.length}</p>
     `;
-
     levelCard.addEventListener("click", () => showResources(skill, level));
     levelContainer.appendChild(levelCard);
   });
@@ -238,9 +242,7 @@ function showLevelCards() {
 function showResources(skill, level) {
   const container = document.getElementById("level-resources");
   container.innerHTML = `<h3>${skill} - ${level} Resources</h3>`;
-
   const filtered = resources.filter(r => r.skill === skill && r.level === level);
-
   if (filtered.length === 0) {
     container.innerHTML += "<p>No resources available for this level.</p>";
     return;
@@ -251,7 +253,7 @@ function showResources(skill, level) {
     const card = document.createElement("div");
     card.classList.add("resource-card");
     card.innerHTML = `
-      <h4><a href="${r.url}" target="_blank">${r.title}</a></h4>
+      <a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.title}</a>
       <p>Type: ${r.type}</p>
     `;
 
@@ -260,8 +262,9 @@ function showResources(skill, level) {
       btn.innerText = completed ? "Completed ✅" : "Mark as Complete";
       btn.addEventListener("click", () => {
         toggleProgress(r.id);
-        showLevelCards(); 
-        showResources(skill, level); 
+        // Only update button and progress snapshot
+        btn.innerText = progress[r.id] ? "Completed ✅" : "Mark as Complete";
+        if (document.getElementById("home-content")) renderHome();
       });
     } else {
       btn.innerText = "Sign in to track progress";
@@ -283,7 +286,6 @@ function renderMyLearning() {
     return;
   }
 
-  // Group progress by skill
   const skillMap = {};
   resources.forEach(r => {
     if (!skillMap[r.skill]) skillMap[r.skill] = { completed: 0, total: 0 };
@@ -292,14 +294,12 @@ function renderMyLearning() {
   });
 
   const skillsStarted = Object.keys(skillMap).filter(skill => skillMap[skill].completed > 0);
-
   if (skillsStarted.length === 0) {
     container.innerHTML = "<p>No progress yet. Explore resources to start learning!</p>";
     return;
   }
 
   container.innerHTML = "";
-
   skillsStarted.forEach(skill => {
     const card = document.createElement("div");
     card.classList.add("skill-card");
@@ -321,7 +321,12 @@ function toggleProgress(id) {
 // ==================== INITIALIZATION ====================
 window.onload = () => {
   renderNavbar();
-  renderHome();
-  renderExplore();
-  renderMyLearning();
+  if (document.getElementById("home-content")) renderHome();
+  if (document.getElementById("filter-skill")) renderExplore();
+  if (document.getElementById("my-learning")) renderMyLearning();
+   if (user) {
+    document.getElementById("guest-content").style.display = "none";
+    document.getElementById("user-content").style.display = "block";
+    document.getElementById("username").textContent = user.email.split("@")[0];
+  }
 };
