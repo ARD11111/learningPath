@@ -4,12 +4,15 @@
   <meta charset="UTF-8">
   <title>Explore Resources</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="explore.css">
 </head>
 <body>
   <nav class="navbar">
   <div class="nav-left">
     <a href="index.html" class="nav-link">Home</a>
     <a href="explore.html" class="nav-link">Explore</a>
+    <a href="mylearning.html" class="nav-link">My Learning</a>
+        <a href="settings.html" class="nav-link">Settings</a>
   </div>
 
   <div id="navbar-right" class="nav-right"></div>
@@ -18,7 +21,7 @@
 
   <!-- Explore Page -->
 <div class="container">
-  <h2>Explore Resources</h2>
+  <h1>Explore Resources</h1>
 
   <!-- Filters -->
  <!-- Filters -->
@@ -52,15 +55,20 @@
 </div>
 
 <!-- LOGIN MODAL -->
+ 
 <div id="login-modal" class="modal">
   <div class="modal-content">
-    <span class="close-btn" onclick="closeLogin()">&times;</span>
-    <h2>Sign In</h2>
+    <div class="top-row">
+      <h2>Sign In</h2>
+      <span class="close-btn" onclick="closeLogin()">&times;</span>
+    </div>
+    <div class="fields">
     <input type="text" id="username" placeholder="Enter your name">
     <button onclick="login()">Sign In</button>
+    </div>
   </div>
 </div>
-
+</div>
 
 
 

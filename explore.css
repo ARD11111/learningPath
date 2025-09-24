@@ -1,0 +1,95 @@
+/* #login-modal{
+  border: 2px solid grey;
+  width: 500px;
+  display: none;
+  align-content: center;
+  align-items: center;
+  justify-content: center;
+} */
+ h1{
+  font-size: 40px;
+ }
+.parent{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.modal-content{
+        display: flex;
+        flex-direction: column;
+}
+.modal {
+  display: none; /* hide by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  color: blue;
+  
+}
+.close-btn{
+  color: black;
+  font-size: 40px;
+
+
+}
+#username{
+   display: block;
+  padding: 10px;
+}
+.top-row{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.fields{
+display: flex;
+flex-direction: column;
+gap: 20px;
+}
+
+#level-cards{
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 40px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+}
+#level-cards>div{
+  border: 2px solid gold;
+  font-size: 40px;
+  padding: 20px;
+  border-radius: 30px;
+}
+
+/* resources */
+#level-resources{
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  
+}
+#level-resources>div{
+border: 2px solid navy;
+padding: 20px;
+border-radius: 20px;
+font-size: 25px;
+}
+#level-resources>div>a{
+  text-decoration: none;
+  
+}
+#level-resources>div>button{
+  padding: 10px;
+  border: none;
+  background-color: blue;
+  color: white;
+  font-size: 25px;
+  border-radius: 10px;
+}
